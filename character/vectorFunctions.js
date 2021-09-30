@@ -1,0 +1,31 @@
+function vectorSubtract(vec1, vec2) {
+    return [vec1[0] - vec2[0], vec1[1] - vec2[1]];
+}
+
+function vectorAdd(vec1, vec2) {
+    return [vec1[0] + vec2[0], vec1[1] + vec2[1]];
+}
+
+function vectorMultiply(vec, scalar) {
+    return [vec[0] * scalar, vec[1] * scalar];
+}
+
+function vectorRotate(vec, angleDegree) {
+    var radiansRotation = convertDegreeToRadian(angleDegree);
+    return [vec[0] * Math.cos(radiansRotation) - vec[1] * Math.sin(radiansRotation),
+    vec[0] * Math.sin(radiansRotation) + vec[1] * Math.cos(radiansRotation)]
+}
+
+
+function vectorLength(vec) {
+    return Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1]);
+}
+
+function vectorNormalize(vec) {
+    var len = vectorLength(vec);
+    return [vec[0] / len, vec[1] / len];
+}
+
+function vectorDotProduct(vec1, vec2) {
+    return vec1[0] * vec2[0] + vec1[1] * vec2[1];
+}

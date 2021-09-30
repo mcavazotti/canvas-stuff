@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="globalData.js"></script>
+    <script src="mathFunctions.js"></script>
+    <script src="updateFunctions.js"></script>
+    <script src="renderFunctions.js"></script>
+    <script src="objectFunctions.js"></script>
+    <script src="vectorFunctions.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body onload="initGame()">
+    Enemy color: fed9b7
+    <div id="game-div">
+        <canvas 
+            id="game" 
+            width="800" 
+            height="600" 
+            tabindex="1" 
+            onclick="startGame()" 
+            onmousemove="getMousePosition(event)" 
+            onkeydown="getKeyDown(event)" 
+            onkeyup="getKeyUp(event)"
+            onmousedown="getMouseDown(event)"
+            onmouseup="getMouseUp(event)"
+            oncontextmenu="event.preventDefault()"
+            onmousewheel="handleScroll(event)"
+        ></canvas>
+    </div>
+</body>
+
+</html>
