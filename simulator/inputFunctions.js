@@ -49,7 +49,7 @@ function getMouseUp(event) {
                 // update marker
                 markerData.trail = [];
                 // create object
-                if(markerData.readyToCreate){
+                if (markerData.readyToCreate) {
                     var color = [randomInt(50, 256), randomInt(50, 256), randomInt(50, 256)]
                     simController.objects.add(createObject(markerData.position, markerData.radius, markerData.density, markerData.velocity, rgbToHex(color)));
                     markerData.readyToCreate = false;
@@ -91,11 +91,38 @@ function handleScroll(event) {
     if (simController.simRunning) {
 
         console.log(simController.camera.zoom);
-        if (event.deltaY < 0 && simController.camera.zoom < simController.camera.maxZoom) {
-            simController.camera.zoom = simController.camera.zoom * 1.5;
+        if (event.deltaY < 0) {
+            if (inputValues.keysDown.has("KeyZ")) {
+                if (markerData.radius < markerData.maxRadius) {
+                    markerData.radius *= 1.25;
+                }
+            } else
+                if (inputValues.keysDown.has("KeyX")) {
+                    if(markerData.density < markerData.maxDensity) {
+                        markerData.density *= 1.25;
+                    }
+
+                    console.log(markerData.density);
+                } else
+                    if (simController.camera.zoom < simController.camera.maxZoom) {
+                        simController.camera.zoom = simController.camera.zoom * 1.5;
+                    }
         }
-        if (event.deltaY > 0 && simController.camera.zoom > simController.camera.minZoom) {
-            simController.camera.zoom = simController.camera.zoom / 1.5;
+        if (event.deltaY > 0) {
+            if (inputValues.keysDown.has("KeyZ")) {
+                if (markerData.radius > markerData.minRadius) {
+                    markerData.radius *= 0.8;
+                }
+            } else
+                if (inputValues.keysDown.has("KeyX")) {
+                    if (markerData.density > markerData.minDensity) {
+                    markerData.density *= 0.8;
+                    }
+                    console.log(markerData.density);
+                } else
+                    if (simController.camera.zoom > simController.camera.minZoom) {
+                        simController.camera.zoom = simController.camera.zoom / 1.5;
+                    }
         }
     }
 }
@@ -108,8 +135,15 @@ function handleKeyUp(code) {
         case 'KeyT':
             simController.camera.renderTrail = !simController.camera.renderTrail;
             break;
+        case 'KeyP':
+            simController.simData.paused = !simController.simData.paused;
+            break;
         case 'KeyH':
             simController.camera.renderHelp = !simController.camera.renderHelp;
+            break;
+        case 'KeyC':
+            markerData.radius = 10;
+            markerData.density = 500;
             break;
         case 'Comma':
             var newSimSpeed = 2 * simController.simData.speedup;

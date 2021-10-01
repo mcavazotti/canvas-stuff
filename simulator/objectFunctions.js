@@ -14,8 +14,8 @@ function createObject(position, radiusInKm, density, velocity, color, name="") {
         position: position,
         velocity: velocity,
         trail: [],
-        render: renderCircle(color, radiusInKm),
-        renderTrail: renderTrail(rgbToHex(darkenedColor)),
+        render: renderCircleGenerator(color, radiusInKm),
+        renderTrail: renderTrailGenerator(rgbToHex(darkenedColor)),
         color: c,
         markedForDeletion: false,
     }

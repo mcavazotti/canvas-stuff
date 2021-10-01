@@ -16,9 +16,6 @@ function initSim() {
     simController.clear = () => {
         simController.context.clearRect(0, 0, simController.canvasSize[0], simController.canvasSize[1]);
     };
-
-    var localRenderCircle = renderCircle('#ff3838aa', 10);
-    var localRenderTrail = renderTrail('#ff3838aa');
     simController.render = () => {
         simController.context.fillStyle = '#040252';
         simController.context.fillRect(0, 0, simController.canvasSize[0], simController.canvasSize[1]);
@@ -30,10 +27,24 @@ function initSim() {
             obj.render(obj.position, simController.camera, simController.canvasSize, simController.context);
         }
 
-        localRenderTrail(markerData.trail, simController.camera, simController.canvasSize, simController.context);
-        localRenderCircle(markerData.position, simController.camera, simController.canvasSize, simController.context);
+        //render UI
+        renderTrail(markerData.trail, '#ff3838aa', simController.camera, simController.canvasSize, simController.context);
+        renderCircle(markerData.position, markerData.radius, '#ff3838aa', simController.camera, simController.canvasSize, simController.context);
 
         renderHelp(simController.context, simController.camera);
+        if (simController.simData.paused) {
+            simController.context.fillStyle = '#ffffffcc';
+            simController.context.font = '20px Courier New';
+            simController.context.fillText("Paused", simController.canvasSize[0] - 100, 30)
+        }
+
+        simController.context.fillStyle = '#ffffffcc';
+        simController.context.font = 'bold 14px Courier New';
+        simController.context.fillText("New object info", 20, simController.canvasSize[1] - 35);
+        simController.context.font = '12px Courier New';
+        simController.context.fillText("Radius: " + markerData.radius.toPrecision(4) + " km", 20, simController.canvasSize[1] - 20);
+        simController.context.fillText("Density: " + markerData.density.toPrecision(4) + " kg/m^3", 20, simController.canvasSize[1] - 10);
+
     };
 
     simController.updateObjects = (placeholderFps) => {
@@ -48,57 +59,60 @@ function initSim() {
         if (inputValues.keysDown.has('KeyD'))
             cameraMovement = vectorAdd(cameraMovement, [1, 0]);
 
-        if(vectorLength(cameraMovement)> 0.001){
+        if (vectorLength(cameraMovement) > 0.001) {
             cameraMovement = vectorNormalize(cameraMovement);
         }
 
-        simController.camera.position = vectorAdd(simController.camera.position, vectorMultiply(cameraMovement, simController.camera.frustrumWidth / (2*simController.camera.zoom * simController.realFps)));
+        simController.camera.position = vectorAdd(simController.camera.position, vectorMultiply(cameraMovement, simController.camera.frustrumWidth / (2 * simController.camera.zoom * simController.realFps)));
 
 
         // simulate objects 
-        for (let i = 0; i <= simController.simData.speedup; i++) {
-            var fps = (placeholderFps ? placeholderFps : simController.realFps) * simController.simData.speedup;
-            // update objects 
-            var deleteObjects = [];
-            for (const obj of simController.objects) {
-                var resultingForce = [0, 0]
-                //remove obj if too far away
-                if (vectorLength(obj.position) > simController.simData.maxDistance || obj.markedForDeletion) {
-                    deleteObjects.push(obj);
-                } else {
-                    for (const obj2 of simController.objects) {
-                        // check if it's a valid obj
-                        if (obj != obj2 && !obj2.markedForDeletion) {
-                            // check for colision
-                            if (vectorLength(vectorSubtract(obj2.position, obj.position)) > obj.radius + obj2.radius) {
-                                resultingForce = vectorAdd(resultingForce, gravitationalForce(obj, obj2));
-                            } else {
-                                if (obj.mass < obj2.mass) {
-                                    obj.markedForDeletion = true;
-                                    // obj2.mass += obj.mass;
-                                    deleteObjects.push(obj);
+        if (!simController.simData.paused) {
+
+            for (let i = 0; i <= simController.simData.speedup; i++) {
+                var fps = (placeholderFps ? placeholderFps : simController.realFps) * simController.simData.speedup;
+                // update objects 
+                var deleteObjects = [];
+                for (const obj of simController.objects) {
+                    var resultingForce = [0, 0]
+                    //remove obj if too far away
+                    if (vectorLength(obj.position) > simController.simData.maxDistance || obj.markedForDeletion) {
+                        deleteObjects.push(obj);
+                    } else {
+                        for (const obj2 of simController.objects) {
+                            // check if it's a valid obj
+                            if (obj != obj2 && !obj2.markedForDeletion) {
+                                // check for colision
+                                if (vectorLength(vectorSubtract(obj2.position, obj.position)) > obj.radius + obj2.radius) {
+                                    resultingForce = vectorAdd(resultingForce, gravitationalForce(obj, obj2));
                                 } else {
-                                    obj2.markedForDeletion = true;
-                                    // obj.mass += obj2.mass;
-                                    deleteObjects.push(obj2);
+                                    if (obj.mass < obj2.mass) {
+                                        obj.markedForDeletion = true;
+                                        // obj2.mass += obj.mass;
+                                        deleteObjects.push(obj);
+                                    } else {
+                                        obj2.markedForDeletion = true;
+                                        // obj.mass += obj2.mass;
+                                        deleteObjects.push(obj2);
+                                    }
                                 }
                             }
                         }
+                        var acceleration = vectorMultiply(resultingForce, 1 / obj.mass);
+
+                        if (obj.trail.length > simController.maxTrailLength) {
+                            obj.trail.shift();
+                        }
+
+                        obj.trail.push(obj.position);
+
+                        obj.velocity = vectorAdd(obj.velocity, vectorMultiply(acceleration, simController.simData.step / fps));
+                        obj.position = vectorAdd(obj.position, vectorMultiply(obj.velocity, simController.simData.step / fps));
                     }
-                    var acceleration = vectorMultiply(resultingForce, 1 / obj.mass);
-
-                    if (obj.trail.length > simController.maxTrailLength) {
-                        obj.trail.shift();
-                    }
-
-                    obj.trail.push(obj.position);
-
-                    obj.velocity = vectorAdd(obj.velocity, vectorMultiply(acceleration, simController.simData.step / fps));
-                    obj.position = vectorAdd(obj.position, vectorMultiply(obj.velocity, simController.simData.step / fps));
                 }
-            }
-            for (const obj of deleteObjects) {
-                simController.objects.delete(obj);
+                for (const obj of deleteObjects) {
+                    simController.objects.delete(obj);
+                }
             }
         }
     };

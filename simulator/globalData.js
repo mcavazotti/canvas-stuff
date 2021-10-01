@@ -6,8 +6,8 @@ simController = {
     objects: new Set(),
     camera: {
         position: [0, 0],
-        renderTrail:true,
-        renderHelp:false,
+        renderTrail: true,
+        renderHelp: false,
         frustrumWidth: 1000,
         aspectRatio: 0,
         zoom: 1,
@@ -15,6 +15,7 @@ simController = {
         minZoom: 0.1
     },
     simData: {
+        paused: false,
         maxDistance: 1e9,
         maxSpeedup: 64,
         speedup: 4,
@@ -28,8 +29,12 @@ cachedValues = {
 };
 
 markerData = {
+    maxRadius: 800,
+    minRadius: 2,
+    maxDensity: 500000,
+    minDensity: 15,
     radius: 10,
-    density: 1,
+    density: 500,
     position: [0, 0],
     velocity: [0, 0],
     trail: [],
