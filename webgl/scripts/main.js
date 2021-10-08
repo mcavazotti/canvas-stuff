@@ -13,6 +13,7 @@ function main() {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+            vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
@@ -22,5 +23,17 @@ function main() {
 
     const buffers = initBuffers(gl);
 
-    drawScene(gl,programInfo,buffers);
+    var then = 0;
+    function render(now) {
+        now *= 0.001;  // convert to seconds
+        const deltaTime = now - then;
+        then = now;
+    
+        drawScene(gl, programInfo, buffers, deltaTime);
+    
+        requestAnimationFrame(render);
+    }
+    
+    requestAnimationFrame(render);
 }
+
