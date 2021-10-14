@@ -41,35 +41,42 @@ function loadShader(gl, type, source) {
 }
 
 function initBuffers(gl) {
-    const positions = [
-        -1.0, 1.0,
-        1.0, 1.0,
-        -1.0, -1.0,
-        1.0, -1.0
-    ];
 
-    const colors = [
-        1.0, 1.0, 1.0, 1.0,    // white
-        1.0, 0.0, 0.0, 1.0,    // red
-        0.0, 1.0, 0.0, 1.0,    // green
-        0.0, 0.0, 1.0, 1.0,    // blue
-    ];
+    // Convert the array of colors into a table for all the vertices.
+    var colors = [];
+
+    for (let i = 0; i < faceColors.length; i++) {
+        const c = faceColors[i];
+        // Repeat each color four times for the four vertices of the face
+        colors = colors.concat(c, c, c, c);
+    }
+
 
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertices), gl.STATIC_DRAW);
 
     const colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faceIndices), gl.STATIC_DRAW);
+
+    const normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals), gl.STATIC_DRAW);
+
     return {
         position: positionBuffer,
+        normal: normalBuffer,
         color: colorBuffer,
+        indices: indexBuffer,
     };
 }
 
-var squareRotation = 0.0;
+var cubeRotation = 18.5;
 
 function drawScene(gl, programInfo, buffers, deltaTime) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);      // Clear to black, fully opaque
@@ -89,8 +96,8 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
-    const projectionMatrix = mat4.create();
 
+    const projectionMatrix = mat4.create();
     // note: glmatrix.js always has the first argument
     // as the destination to receive the result.
     mat4.perspective(projectionMatrix,
@@ -101,7 +108,6 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
 
     const modelViewMatrix = mat4.create();
-
     // Now move the drawing position a bit to where we want to
     // start drawing the square.
     mat4.translate(modelViewMatrix,     // destination matrix
@@ -110,15 +116,25 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
 
     mat4.rotate(modelViewMatrix,
         modelViewMatrix,
-        squareRotation,
-        [0,0,1]);
+        cubeRotation,
+        [0, 0, 1]);
+    mat4.rotate(modelViewMatrix,
+        modelViewMatrix,
+        cubeRotation,
+        [0, 1, 0]);
 
-    squareRotation += deltaTime;
+
+    cubeRotation += deltaTime;
+
+    const normalMatrix = mat4.create();
+    mat4.invert(normalMatrix, modelViewMatrix);
+    mat4.transpose(normalMatrix,normalMatrix)
+
 
     // Tell WebGL how to pull out the positions from the position
     // buffer into the vertexPosition attribute
     {
-        const numComponents = 2;
+        const numComponents = 3;
         const type = gl.FLOAT;
         const normalize = false;
         const stride = 0;
@@ -154,15 +170,41 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
         gl.enableVertexAttribArray(
             programInfo.attribLocations.vertexColor);
     }
-    gl.useProgram(programInfo.program);
 
+    // Tell WebGL which indices to use to index the vertices
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+
+    // Tell WebGL how to pull out the normals from
+    // the normal buffer into the vertexNormal attribute.
+    {
+        const numComponents = 3;
+        const type = gl.FLOAT;
+        const normalize = false;
+        const stride = 0;
+        const offset = 0;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+        gl.vertexAttribPointer(
+            programInfo.attribLocations.vertexNormal,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset
+        );
+        gl.enableVertexAttribArray(programInfo.attribLocations.vertexNormal);
+    }
+
+    gl.useProgram(programInfo.program);
     // Set shader uniforms
     gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
     gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+    gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
 
     {
+        const vertexCount = 36;
+        const type = gl.UNSIGNED_SHORT;
         const offset = 0;
-        const vertexCount = 4;
-        gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
 }

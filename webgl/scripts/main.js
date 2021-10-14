@@ -13,11 +13,13 @@ function main() {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+            vertexNormal: gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
             vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
+            normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
         }
     };
 
