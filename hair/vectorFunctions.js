@@ -29,3 +29,15 @@ function vectorNormalize(vec) {
 function vectorDotProduct(vec1, vec2) {
     return vec1[0] * vec2[0] + vec1[1] * vec2[1];
 }
+
+function randomVectorInUnitCircle() {
+    var theta = 2.0 * Math.PI * Math.random();
+    var r;
+    do {
+        r = Math.random();
+    } while (r < 0.01);
+
+
+    return vectorMultiply([Math.cos(theta), Math.sin(theta)], r);
+
+}

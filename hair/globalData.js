@@ -1,4 +1,6 @@
 simParameters = {
+    strandsCount: 50,
+    strandSegments: 5,
     gravity: 100,
     springConstant: 150,
     particleMass: 1.0,
@@ -18,5 +20,7 @@ camera = {
     minZoom: 0.1
 }
 simObjects = {
+    headSize: 10,
+    headPos: [0,0],
     hairStrands: []
 }

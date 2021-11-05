@@ -3,6 +3,16 @@
     height: 100%;
 }
 
+#sim-controls {
+    margin: 50px 100px;
+    margin-right: 0;
+}
+
+body {
+    display: flex;
+}
+
+
 #sim {
     display: block;
     margin: 50px auto;

@@ -18,5 +18,9 @@ function elasticForce(springConstant, restDistance,point1, point2){
 function randomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+    return Math.floor(randomFloat(min,max)); //The maximum is exclusive and the minimum is inclusive
+}
+
+function randomFloat(min,max) {
+    return Math.random() * (max - min) + min; //The maximum is exclusive and the minimum is inclusive
 }
