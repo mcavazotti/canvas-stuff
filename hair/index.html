@@ -21,21 +21,24 @@
             <div>
                 <label for="gravity">Gravity:</label>
             </div>
-            <input type="range" name="gravity" id="gravity" min="0" max="500" onchange="changeParameters(this.value,'gravity')">
+            <input type="range" name="gravity" id="gravity" min="0" max="500"
+                onchange="changeParameters(this.value,'gravity')">
             <span id="gravity-span"></span>
         </div>
         <div>
             <div>
                 <label for="spring">Spring Constant:</label>
             </div>
-            <input type="range" name="spring" id="spring" min="0" max="500" onchange="changeParameters(this.value,'spring')">
+            <input type="range" name="spring" id="spring" min="0" max="500"
+                onchange="changeParameters(this.value,'spring')">
             <span id="spring-span"></span>
         </div>
         <div>
             <div>
                 <label for="damping">Damping:</label>
             </div>
-            <input type="range" name="damping" id="damping" min="0" max="10" onchange="changeParameters(this.value,'damping')">
+            <input type="range" name="damping" id="damping" min="0" max="10"
+                onchange="changeParameters(this.value,'damping')">
             <span id="damping-span"></span>
         </div>
         <div>
@@ -45,9 +48,13 @@
             <input type="range" name="mass" id="mass" min="0" max="10" onchange="changeParameters(this.value,'mass')">
             <span id="mass-span"></span>
         </div>
+        <button onclick="startSim()"> Start simulation</button>
     </div>
     <div id="sim-div">
-        <canvas id="sim" width="800" height="600" tabindex="1" onclick="startSim()">
+        <canvas id="sim" width="800" height="600" tabindex="1"
+            onmousemove="getMousePosition(event)"
+            onmousedown="getMouseDown(event)" 
+            onmouseup="getMouseUp(event)">
         </canvas>
     </div>
 </body>

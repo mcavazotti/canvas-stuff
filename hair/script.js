@@ -20,9 +20,9 @@ function initSim() {
     // initialize hair
     for (let i = 0; i < simParameters.strandsCount; i++) {
         var vec = randomVectorInUnitCircle();
-        console.log(vectorLength(vec));
-        vec = vectorAdd(vectorMultiply(vec, simObjects.headSize), simObjects.headPos);
-        console.log(vectorLength(vec));
+        var root = vectorMultiply(vec, simObjects.headSize);
+        simObjects.hairRoots.push(root);
+        vec = vectorAdd(root, simObjects.headPos);
         simObjects.hairStrands.push(createHairStrand(vec, simParameters.strandSegments));
 
     }
@@ -39,11 +39,33 @@ function startSim() {
         var deltaTime = now - then;
         then = now;
 
+        // deal with fps drop
         if (deltaTime > (1 / 24))
             deltaTime = 1 / 24;
 
+        // update sim parameters
+        if (newSimParameters.changed) {
+            for (const key in newSimParameters) {
+                if (key != 'changed') {
+                    if (Object.hasOwnProperty.call(newSimParameters, key)) {
+                        simParameters[key] = newSimParameters[key];
+                    }
+                }
+            }
+        }
+        newSimParameters.changed = false;
+
+        // UPDATING
+        if(inputValues.dragging){
+            simObjects.headPos = vectorAdd(inputValues.mouseWorldPos, inputValues.dragOffset);
+            for (let i = 0; i < simObjects.hairStrands.length; i++) {
+                simObjects.hairStrands[i][0].pos = vectorAdd(simObjects.hairRoots[i], simObjects.headPos);
+            }
+        }
+
         updateHair(deltaTime);
 
+        // RENDERING
         camera.context.clearRect(0, 0, camera.canvasSize[0], camera.canvasSize[1]);
 
         // render head
@@ -59,6 +81,48 @@ function startSim() {
 
 function changeParameters(val, selector) {
     $("#" + selector + "-span").html(val);
-    simParameters[selector] = val;
-    console.log(selector, simParameters[selector]);
+    var key;
+    switch (selector) {
+        case 'gravity':
+        case 'damping':
+            key = selector;
+            break;
+        case 'spring':
+            key = 'springConstant';
+            break;
+        case 'mass':
+            key = 'particleMass'
+            break;
+        default:
+            break;
+    }
+
+    if (key) {
+        newSimParameters = {};
+        newSimParameters[key] = parseFloat(val);
+        newSimParameters.changed = true;
+    }
+}
+
+function getMousePosition(event) {
+    var rect = camera.canvas.getBoundingClientRect();
+    inputValues.mousePos = [event.clientX - rect.left, event.clientY - rect.top];
+    inputValues.mouseWorldPos = convertRasterCoordToWorld(inputValues.mousePos,camera,camera.canvasSize);
+}
+
+function getMouseDown(event) {
+    console.log(event.button);
+    if (event.button == 0) {
+        inputValues.mouseDown = true;
+        var offset = vectorSubtract(simObjects.headPos,inputValues.mouseWorldPos);
+        if(vectorLength(offset) <= simObjects.headSize) {
+            inputValues.dragging = true;
+            inputValues.dragOffset = offset;
+        }
+    }
+}
+
+function getMouseUp(event) {
+    inputValues.mouseDown = false;
+    inputValues.dragging = false;
 }

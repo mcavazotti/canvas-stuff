@@ -1,12 +1,24 @@
 simParameters = {
-    strandsCount: 50,
-    strandSegments: 5,
     gravity: 100,
     springConstant: 150,
     particleMass: 1.0,
-    segmentLength: 5,
+    strandsCount: 50,
+    strandSegments: 10,
+    segmentLength: 2,
     damping: 1,
 }
+
+inputValues = {
+    mousePos: [0, 0],
+    mouseWorldPos: [0, 0],
+    mouseDown: false,
+    dragging: false,
+    dragOffset: [0,0],
+}
+
+newSimParameters = {
+    changed: false
+};
 
 camera = {
     canvas: null,
@@ -21,6 +33,7 @@ camera = {
 }
 simObjects = {
     headSize: 10,
-    headPos: [0,0],
+    headPos: [0, 0],
+    hairRoots: [],
     hairStrands: []
 }
