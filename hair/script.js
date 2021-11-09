@@ -53,6 +53,7 @@ function startSim() {
                 }
             }
         }
+        newSimParameters = {};
         newSimParameters.changed = false;
 
         // UPDATING
@@ -98,7 +99,6 @@ function changeParameters(val, selector) {
     }
 
     if (key) {
-        newSimParameters = {};
         newSimParameters[key] = parseFloat(val);
         newSimParameters.changed = true;
     }
