@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <!-- <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.134.0';
+
+        const scene = new THREE.Scene();
+    </script> -->
+    <script type="module">
+        import {main} from './script.js';
+        window.main = main;
+    </script>
+</head>
+
+<body onload="main()">
+    <div id="c-div">
+        <canvas id="c" width="600" height="400"></canvas>
+    </div>
+</body>
+
+</html>
