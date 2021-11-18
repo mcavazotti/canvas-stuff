@@ -16,6 +16,7 @@ simController = {
     },
     simData: {
         paused: false,
+        bounce: true,
         maxDistance: 1e9,
         maxSpeedup: 64,
         speedup: 4,
@@ -50,3 +51,4 @@ inputValues = {
 };
 
 const gravitationalConstant = 6.674 * 1e-11;
+const elasticCoefficient = 0.95;

@@ -31,7 +31,7 @@ function initSim() {
         renderTrail(markerData.trail, '#ff3838aa', simController.camera, simController.canvasSize, simController.context);
         renderCircle(markerData.position, markerData.radius, '#ff3838aa', simController.camera, simController.canvasSize, simController.context);
 
-        renderHelp(simController.context, simController.camera);
+        renderHelp(simController.context, simController.camera, simController.simData);
         if (simController.simData.paused) {
             simController.context.fillStyle = '#ffffffcc';
             simController.context.font = '20px Courier New';
@@ -83,17 +83,28 @@ function initSim() {
                             // check if it's a valid obj
                             if (obj != obj2 && !obj2.markedForDeletion) {
                                 // check for colision
-                                if (vectorLength(vectorSubtract(obj2.position, obj.position)) > obj.radius + obj2.radius) {
+                                var positionOffset = vectorSubtract(obj2.position, obj.position);
+                                if (vectorLength(positionOffset) > obj.radius + obj2.radius) {
                                     resultingForce = vectorAdd(resultingForce, gravitationalForce(obj, obj2));
                                 } else {
-                                    if (obj.mass < obj2.mass) {
-                                        obj.markedForDeletion = true;
-                                        // obj2.mass += obj.mass;
-                                        deleteObjects.push(obj);
+                                    if (simController.simData.bounce) {
+                                        var relativeVelocity = vectorSubtract(obj2.velocity,obj.velocity);
+                                        var dampedVelocity = vectorMultiply(relativeVelocity,(1 + elasticCoefficient));
+                                        var contactNormal = vectorNormalize(positionOffset);
+                                        var impulse = (vectorDotProduct(dampedVelocity,contactNormal))/(vectorDotProduct(contactNormal,contactNormal) * (1/obj.mass + 1/obj2.mass));
+
+                                        obj.velocity = vectorAdd(obj.velocity,vectorMultiply(contactNormal,impulse/obj.mass));
+                                        obj2.velocity = vectorSubtract(obj2.velocity,vectorMultiply(contactNormal,impulse/obj2.mass));
                                     } else {
-                                        obj2.markedForDeletion = true;
-                                        // obj.mass += obj2.mass;
-                                        deleteObjects.push(obj2);
+                                        if (obj.mass < obj2.mass) {
+                                            obj.markedForDeletion = true;
+                                            // obj2.mass += obj.mass;
+                                            deleteObjects.push(obj);
+                                        } else {
+                                            obj2.markedForDeletion = true;
+                                            // obj.mass += obj2.mass;
+                                            deleteObjects.push(obj2);
+                                        }
                                     }
                                 }
                             }

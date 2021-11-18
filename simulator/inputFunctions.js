@@ -145,6 +145,9 @@ function handleKeyUp(code) {
             markerData.radius = 10;
             markerData.density = 500;
             break;
+        case 'KeyB':
+            simController.simData.bounce = !simController.simData.bounce;
+            break;
         case 'Comma':
             var newSimSpeed = 2 * simController.simData.speedup;
             simController.simData.speedup = simController.simData.maxSpeedup < newSimSpeed ? simController.simData.maxSpeedup : newSimSpeed;

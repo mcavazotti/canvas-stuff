@@ -11,7 +11,7 @@ function convertRasterCoordToWorld(position, camera, canvasSize) {
     var camRelativeOffset = [cameraSpacePos[0] * (camera.frustrumWidth / camera.zoom), cameraSpacePos[1] * (camera.frustrumHeight / camera.zoom)];
     return [camera.position[0] + camRelativeOffset[0], camera.position[1] - camRelativeOffset[1]]
 }
-function renderHelp(context, camera) {
+function renderHelp(context, camera, simData) {
     var controls = [
         "<comma>/<period>           speed up/down simulation",
         "<left click> + drag        create object",
@@ -22,6 +22,7 @@ function renderHelp(context, camera) {
         "<Z> + scroll               change radius of new object",
         "<X> + scroll               change density of new object",
         "<C>                        reset radius and density",
+        "<B>                        toggle bounce " + (simData.bounce ? "off": "on"),
         "<H>                        hide Controls",
     ];
 
