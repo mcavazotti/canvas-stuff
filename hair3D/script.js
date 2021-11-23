@@ -1,13 +1,14 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.134.0';
 import { TrackballControls } from './external/TrackballControls.js';
-import { convertPositionBufferToVec3 } from './bufferFunctions.js';
+import { convertBufferToVec3 } from './bufferFunctions.js';
+import { Hair } from './hair.js';
 
 export function main() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x545454);
 
     const canvas = document.querySelector('#c');
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false });
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 
     // camera params
     const fov = 75;
@@ -27,7 +28,9 @@ export function main() {
     // const geometry = new THREE.PlaneGeometry(1, 1);
     const head = makeInstances(scene,geometry, 0x44aa88, new THREE.Vector3(0, 0, 0));
 
-    generateStrands(geometry);
+    const hair = generateHair(head);
+    
+    scene.updateMatrixWorld();
 
     // lighting
     {
@@ -61,8 +64,12 @@ function makeInstances(scene, geometry, color, position) {
     return instance;
 }
 
-function generateStrands(geometry) {
-    var positionArray = convertPositionBufferToVec3(geometry.getAttribute('position'));
-    console.log(positionArray);
+function generateHair(instance) {
+    const positionArray = convertBufferToVec3(instance.geometry.getAttribute('position'));
+    const normalArray = convertBufferToVec3(instance.geometry.getAttribute('normal'));
+    const hair =  new Hair(positionArray, normalArray,10,0.2,'tomato');    
 
+    instance.add(hair);
+
+    return hair;
 }
