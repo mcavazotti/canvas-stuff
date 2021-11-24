@@ -26,10 +26,10 @@ export function main() {
     // const geometry = new THREE.SphereGeometry(headRadius, 32, 16);
     const geometry = new THREE.BoxGeometry();
     // const geometry = new THREE.PlaneGeometry(1, 1);
-    const head = makeInstances(scene,geometry, 0x44aa88, new THREE.Vector3(0, 0, 0));
+    const head = makeInstances(scene, geometry, 0x44aa88, new THREE.Vector3(0, 0, 0));
 
     const hair = generateHair(head);
-    
+
     scene.updateMatrixWorld();
 
     // lighting
@@ -67,7 +67,7 @@ function makeInstances(scene, geometry, color, position) {
 function generateHair(instance) {
     const positionArray = convertBufferToVec3(instance.geometry.getAttribute('position'));
     const normalArray = convertBufferToVec3(instance.geometry.getAttribute('normal'));
-    const hair =  new Hair(positionArray, normalArray,10,0.2,'tomato');    
+    const hair = new Hair(positionArray, normalArray, 'tomato', { numSegments: 10 });
 
     instance.add(hair);
 
