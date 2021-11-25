@@ -17,6 +17,7 @@ export function main() {
     const far = 1000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     camera.position.z = 10;
+    camera.position.y = -5;
 
 
     const controls = new TrackballControls(camera, canvas);
@@ -30,8 +31,6 @@ export function main() {
 
     const hair = generateHair(head);
 
-    scene.updateMatrixWorld();
-
     // lighting
     {
         const ambientLight = new THREE.AmbientLight(0x545454);
@@ -42,10 +41,14 @@ export function main() {
         scene.add(directionalLight);
     }
 
+    var prevTime = 0;
     function render(time) {
         time *= 0.001;  // convert time to seconds
-
+        const deltaTime = time -prevTime;
+        prevTime = time;
+        
         controls.update();
+        hair.simulateStep(deltaTime);
 
         renderer.render(scene, camera);
         requestAnimationFrame(render);
@@ -67,9 +70,10 @@ function makeInstances(scene, geometry, color, position) {
 function generateHair(instance) {
     const positionArray = convertBufferToVec3(instance.geometry.getAttribute('position'));
     const normalArray = convertBufferToVec3(instance.geometry.getAttribute('normal'));
-    const hair = new Hair(positionArray, normalArray, 'tomato', { numSegments: 10 });
+    const hair = new Hair(positionArray, normalArray, 'tomato', { numSegments: 5 });
 
     instance.add(hair);
+    hair.init();
 
     return hair;
 }

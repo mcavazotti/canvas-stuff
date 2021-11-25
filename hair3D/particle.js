@@ -5,13 +5,24 @@ export class Particle {
     previousPos;
     actingForces;
 
-    constructor (pos) {
+    constructor(pos) {
         this.position = pos.clone();
         this.previousPos = pos.clone();
         this.actingForces = new Vector3();
     }
 
     getVelocity(deltaTime) {
-        return this.previousPos.distanceTo(this.position) / deltaTime;
+        if (deltaTime == 0)
+            return new Vector3(0, 0, 0);
+
+        const direction = this.position.clone().sub(this.previousPos).normalize();
+        const velocity = this.previousPos.distanceTo(this.position) / deltaTime;
+
+        return direction.clone().multiplyScalar(velocity);
+    }
+
+    updatePosition(newPos) {
+        this.previousPos = this.position.clone();
+        this.position = newPos.clone();
     }
 }

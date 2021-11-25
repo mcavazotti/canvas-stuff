@@ -8,16 +8,20 @@ import {
 } from 'https://cdn.skypack.dev/three@0.134.0';
 
 import { Particle } from './particle.js';
+import { elasticForce } from './physics.js';
 
 export class Hair extends LineSegments {
     strands = [];
 
     #numSegments = 5;
+    #previousDeltaTime = 0;
     segmentLength = 0.2;
     elasticCoeficient = 100;
-    particleMass = 0.01;
+    auxElasticCoeficient = 1;
+    auxLengthRatio = 2;
+    particleMass = 1;
     gravity = 10;
-    damping = 1;
+    damping = 10;
 
     previousGlobalPosition = new Vector3();
     globalPosition = new Vector3();
@@ -77,6 +81,10 @@ export class Hair extends LineSegments {
             this.segmentLength = params.segmentLength;
         if ('elasticCoeficient' in params)
             this.elasticCoeficient = params.elasticCoeficient;
+        if ('auxElasticCoeficient' in params)
+            this.auxElasticCoeficient = params.auxElasticCoeficient;
+        if ('auxLengthRatio' in params)
+            this.auxLengthRatio = params.auxLengthRatio;
         if ('mass' in params)
             this.particleMass = params.mass;
         if ('gravity' in params)
@@ -89,11 +97,58 @@ export class Hair extends LineSegments {
         this.getWorldPosition(this.globalPosition);
         this.previousGlobalPosition = this.globalPosition.clone();
         for (const strand of this.strands) {
-            for (const particle of strand) {
+            for (let i = -1; i < this.#numSegments; i++) {
+                const particle = strand.get(i);
                 particle.position.add(this.globalPosition);
                 particle.previousPos.add(this.globalPosition);
             }
         }
+    }
+
+    simulateStep(deltaTime) {
+        for (const strand of this.strands) {
+            for (let i = 1; i < this.#numSegments; i++) {
+                const particle = strand.get(i);
+
+                // gravity force
+                particle.actingForces = new Vector3(0, 0, -1).multiplyScalar(this.particleMass * this.gravity);
+
+                // direct iteraction with segments
+                var elastic1 = elasticForce(this.elasticCoeficient, this.segmentLength, particle.position, strand.get(i - 1).position);
+                var elastic2;
+                particle.actingForces.add(elastic1);
+                if (i + 1 < this.#numSegments){
+                    elastic2 = elasticForce(this.elasticCoeficient, this.segmentLength, particle.position, strand.get(i + 1).position);
+                    particle.actingForces.sub(elastic2);
+                }
+
+                // stiffness
+                var stiff1 = elasticForce(this.auxElasticCoeficient, this.segmentLength * this.auxLengthRatio, particle.position, strand.get(i - 2).position);
+                var stiff2;
+                particle.actingForces.add(stiff1);
+                if (i + 2 < this.#numSegments){
+                    stiff2 = elasticForce(this.auxElasticCoeficient, this.segmentLength * this.auxLengthRatio, particle.position, strand.get(i + 2).position);
+                    particle.actingForces.sub(stiff2);
+                }
+
+                // damping
+                var damp = particle.getVelocity(this.#previousDeltaTime).multiplyScalar(this.damping);
+                particle.actingForces.sub(damp);
+            }
+
+            for (let i = 1; i < this.#numSegments; i++) {
+                const particle = strand.get(i);
+
+                const acceleration = particle.actingForces.clone().multiplyScalar(1 / this.particleMass);
+                const finalVelocity = particle.getVelocity(this.#previousDeltaTime).add(acceleration.multiplyScalar(deltaTime));
+                const newPos = particle.position.clone().add(finalVelocity.multiplyScalar(deltaTime));
+                // console.log("pos",newPos);
+                particle.updatePosition(newPos);
+
+            }
+        }
+        this.#previousDeltaTime = deltaTime;
+        this.#updateGeometry();
     }
 
     #updateGeometry() {
