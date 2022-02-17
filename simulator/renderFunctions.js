@@ -18,6 +18,7 @@ function renderHelp(context, camera, simData) {
         "<T>                        toggle " + (camera.renderTrail ? "off" : "on") + " trail",
         "<P>                        pause simulation",
         "<Q>                        reset camera position",
+        "<R>                        reset simulation",
         "<W>/<A>/<S>/<D>            move camera",
         "<Z> + scroll               change radius of new object",
         "<X> + scroll               change density of new object",

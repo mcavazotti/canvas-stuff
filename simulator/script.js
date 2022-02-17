@@ -7,10 +7,7 @@ function initSim() {
     simController.camera.aspectRatio = simController.canvasSize[1] / simController.canvasSize[0];
     simController.camera.frustrumHeight = simController.camera.frustrumWidth * simController.camera.aspectRatio;
 
-    // add sun 
-    simController.objects.add(createObject([0, 0], 100, 1400, [0, 0], '#ffdd00', 'sun'))
-    simController.objects.add(createObject([450, 0], 12, 1600, [0, 0.03], '#2aabde', 'earth'))
-    simController.objects.add(createObject([425, 1], 2, 15, [0, 0.036], '#ffddee',))
+    resetSim();
 
     // set up functions
     simController.clear = () => {
@@ -135,6 +132,18 @@ function initSim() {
     simController.context.font = '48px Arial';
     var textSize = simController.context.measureText("Click to start");
     simController.context.fillText("Click to start", (simController.canvasSize[0] - textSize.width) / 2, simController.canvasSize[1] / 2);
+}
+
+function resetSim() {
+    simController.camera.position = [0,0];
+    simController.camera.zoom = 1;
+
+    simController.simData.speedup = 4;
+
+    simController.objects.clear();
+    simController.objects.add(createObject([0, 0], 100, 1400, [0, 0], '#ffdd00', 'sun'))
+    simController.objects.add(createObject([450, 0], 12, 1600, [0, 0.03], '#2aabde', 'earth'))
+    simController.objects.add(createObject([425, 1], 2, 15, [0, 0.036], '#ffddee',))
 }
 
 function startSim() {

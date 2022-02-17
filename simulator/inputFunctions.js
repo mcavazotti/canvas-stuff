@@ -132,6 +132,9 @@ function handleKeyUp(code) {
         case 'KeyQ':
             simController.camera.position = [0, 0];
             break;
+        case 'KeyR':
+            resetSim()
+            break;
         case 'KeyT':
             simController.camera.renderTrail = !simController.camera.renderTrail;
             break;
